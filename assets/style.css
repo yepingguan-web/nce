@@ -89,14 +89,41 @@ body {
 }
 
 .wechat-promo {
-  font-size: 0.78rem;
-  color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  padding: 0.25rem 0.7rem;
-  border-radius: 12px;
-  border: 1px solid color-mix(in srgb, var(--accent) 28%, transparent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(135deg, #07c160, #06ad56);
+  padding: 0.3rem 0.85rem;
+  border-radius: 14px;
   white-space: nowrap;
   flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(7, 193, 96, 0.3);
+  animation: wechat-glow 2.5s ease-in-out infinite;
+}
+
+@keyframes wechat-glow {
+  0%, 100% { box-shadow: 0 2px 8px rgba(7, 193, 96, 0.3); }
+  50% { box-shadow: 0 2px 16px rgba(7, 193, 96, 0.5); }
+}
+
+.wechat-name {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  transition: all 0.2s;
+  padding: 0.1rem 0.2rem;
+  border-radius: 3px;
+}
+
+.wechat-name:hover {
+  background: rgba(255, 255, 255, 0.25);
+  text-decoration-style: solid;
+}
+
+.wechat-name.copied {
+  background: rgba(255, 255, 255, 0.3);
+  text-decoration: none;
 }
 
 .nav-actions {

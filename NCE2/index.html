@@ -18,7 +18,7 @@
     <div class="nav-left">
       <a href="../index.html" class="back-btn">← 返回首页</a>
       <h1 class="nav-title">📚 NCE 第二册</h1>
-      <span class="wechat-promo">微信公众号：科学带孩子</span>
+      <span class="wechat-promo">微信公众号：<span class="wechat-name" onclick="copyWechatName(this)" title="点击复制公众号名称">科学带孩子</span></span>
     </div>
     <div class="nav-actions">
       <button class="theme-toggle" title="切换主题">🌓</button>
@@ -69,6 +69,28 @@
       document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
       localStorage.setItem('nce-theme', t === 'dark' ? 'light' : 'dark');
     });
+  function copyWechatName(el) {
+    var name = '科学带孩子';
+    navigator.clipboard.writeText(name).then(function() {
+      var orig = el.textContent;
+      el.textContent = '已复制 ✓';
+      el.classList.add('copied');
+      setTimeout(function() { el.textContent = orig; el.classList.remove('copied'); }, 1500);
+    }).catch(function() {
+      var input = document.createElement('input');
+      input.value = name;
+      input.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(input);
+      input.select();
+      document.execCommand('copy');
+      document.body.removeChild(input);
+      var orig = el.textContent;
+      el.textContent = '已复制 ✓';
+      el.classList.add('copied');
+      setTimeout(function() { el.textContent = orig; el.classList.remove('copied'); }, 1500);
+    });
+  }
+
   </script>
 </body>
 </html>

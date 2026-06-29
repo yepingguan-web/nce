@@ -696,3 +696,37 @@ let app;
 
 // 导出
 window.NCEApp = NCEApp;
+
+/**
+ * 复制微信公众号名称到剪贴板
+ * @param {HTMLElement} el - 被点击的元素
+ */
+function copyWechatName(el) {
+  const name = '科学带孩子';
+  navigator.clipboard.writeText(name).then(() => {
+    const original = el.textContent;
+    el.textContent = '已复制 ✓';
+    el.classList.add('copied');
+    setTimeout(() => {
+      el.textContent = original;
+      el.classList.remove('copied');
+    }, 1500);
+  }).catch(() => {
+    // 降级方案：传统 execCommand
+    const input = document.createElement('input');
+    input.value = name;
+    input.style.position = 'fixed';
+    input.style.opacity = '0';
+    document.body.appendChild(input);
+    input.select();
+    document.execCommand('copy');
+    document.body.removeChild(input);
+    const original = el.textContent;
+    el.textContent = '已复制 ✓';
+    el.classList.add('copied');
+    setTimeout(() => {
+      el.textContent = original;
+      el.classList.remove('copied');
+    }, 1500);
+  });
+}
