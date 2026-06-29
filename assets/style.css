@@ -635,7 +635,9 @@ body {
 .shortcuts-bar {
   background: var(--bg-primary);
   padding: 0.8rem 2rem;
-  text-align: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   position: fixed;
   bottom: 0;
   left: 0;
@@ -647,6 +649,22 @@ body {
 .shortcut-info {
   font-size: 0.9rem;
   color: var(--text-secondary);
+}
+
+.donate-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid var(--accent);
+  transition: all 0.2s;
+}
+
+.donate-link:hover {
+  background: var(--accent);
+  color: white;
 }
 
 kbd {
@@ -709,6 +727,67 @@ kbd {
   }
   to {
     opacity: 0;
+  }
+}
+
+/* ===== 赞赏区域 ===== */
+.donate-section {
+  margin: 3rem 0;
+}
+
+.donate-card {
+  background: var(--bg-primary);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px var(--shadow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+  flex-wrap: wrap;
+  text-align: center;
+}
+
+.donate-text h3 {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.donate-text p {
+  color: var(--text-secondary);
+  margin-bottom: 0.3rem;
+}
+
+.donate-note {
+  font-size: 0.9rem;
+  color: var(--text-tertiary) !important;
+}
+
+.donate-qrcode {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.donate-qrcode img {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  border: 2px solid var(--border);
+  object-fit: cover;
+}
+
+.donate-qrcode span {
+  font-size: 0.85rem;
+  color: var(--text-tertiary);
+}
+
+@media (max-width: 768px) {
+  .donate-card {
+    flex-direction: column;
+    gap: 1.5rem;
   }
 }
 
