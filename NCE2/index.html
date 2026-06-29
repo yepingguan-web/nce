@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCE2 - 新概念英语第二册</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .lesson-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 1rem; }
+    .lesson-item { background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
+    .lesson-item:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow); }
+    .lesson-item h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .lesson-item p { color: var(--text-secondary); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="../index.html" class="back-btn">← 返回首页</a>
+      <h1 class="nav-title">📚 NCE 第二册</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="切换主题">🌓</button>
+    </div>
+  </nav>
+  <main class="container">
+    <section class="welcome-section">
+      <h2>新概念英语第二册 - 实践与进步</h2>
+      <p class="subtitle">共 96 课 | 短文阅读</p>
+    </section>
+    <div class="lesson-list" id="lessonList"></div>
+  </main>
+  <script>
+    const lessons = [
+      { id: 1, name: 'A Private Conversation', file: '01-a-private-conversation.html', audio: '01－A Private Conversation.mp3' },
+      { id: 2, name: 'Breakfast or Lunch', file: '02-breakfast-or-lunch.html', audio: '02－Breakfast or Lunch.mp3' },
+      { id: 3, name: 'Please Send Me a Card', file: '03-please-send-me-a-card.html', audio: '03－Please Send Me a Card.mp3' },
+      { id: 4, name: 'An Exciting Trip', file: '04-an-exciting-trip.html', audio: '04－An Exciting Trip.mp3' },
+      { id: 5, name: 'No Wrong Numbers', file: '05-no-wrong-numbers.html', audio: '05－No Wrong Numbers.mp3' },
+      { id: 6, name: 'Percy Buttons', file: '06-percy-buttons.html', audio: '06－Percy Buttons.mp3' },
+      { id: 7, name: 'Too Late', file: '07-too-late.html', audio: '07－Too Late.mp3' },
+      { id: 8, name: 'The Best and the Worst', file: '08-the-best-and-the-worst.html', audio: '08－The Best and the Worst.mp3' },
+      { id: 9, name: 'A Cold Welcome', file: '09-a-cold-welcome.html', audio: '09－A Cold Welcome.mp3' },
+      { id: 10, name: 'Not for Jazz', file: '10-not-for-jazz.html', audio: '10－Not for Jazz.mp3' },
+      { id: 11, name: 'One Good Turn Deserves Another', file: '11-one-good-turn-deserves-another.html', audio: '11－One Good Turn Deserves Another.mp3' },
+      { id: 12, name: 'Goodbye and Good Luck', file: '12-goodbye-and-good-luck.html', audio: '12－Goodbye and Good Luck.mp3' },
+      { id: 13, name: 'The Greenwood Boys', file: '13-the-greenwood-boys.html', audio: '13－The Greenwood Boys.mp3' },
+      { id: 14, name: 'Do You Speak English?', file: '14-do-you-speak-english.html', audio: '14－Do You Speak English.mp3' },
+      { id: 15, name: 'Good News', file: '15-good-news.html', audio: '15－Good News.mp3' },
+      { id: 16, name: 'A Polite Request', file: '16-a-polite-request.html', audio: '16－A Polite Request.mp3' },
+      { id: 17, name: 'Always Young', file: '17-always-young.html', audio: '17－Always Young.mp3' },
+      { id: 18, name: 'He Often does This', file: '18-he-often-does-this.html', audio: '18－He Often does This.mp3' },
+      { id: 19, name: 'Sold Out', file: '19-sold-out.html', audio: '19－Sold Out.mp3' },
+      { id: 20, name: 'One Man in a Boat', file: '20-one-man-in-a-boat.html', audio: '20－One Man in a Boat.mp3' },
+    ];
+    
+    const list = document.getElementById('lessonList');
+    lessons.forEach((l, i) => {
+      const a = document.createElement('a');
+      a.className = 'lesson-item';
+      a.href = l.file;
+      a.innerHTML = `<h3>Lesson ${l.id}</h3><p>${l.name}</p>`;
+      list.appendChild(a);
+    });
+    
+    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+      localStorage.setItem('nce-theme', t === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>

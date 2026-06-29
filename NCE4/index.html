@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCE4 - 新概念英语第四册</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .lesson-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 1rem; }
+    .lesson-item { background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
+    .lesson-item:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow); }
+    .lesson-item h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .lesson-item p { color: var(--text-secondary); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="../index.html" class="back-btn">← 返回首页</a>
+      <h1 class="nav-title">📚 NCE 第四册</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="切换主题">🌓</button>
+    </div>
+  </nav>
+  <main class="container">
+    <section class="welcome-section">
+      <h2>新概念英语第四册 - 流利英语</h2>
+      <p class="subtitle">共 48 课 | 长篇文章</p>
+    </section>
+    <div class="lesson-list" id="lessonList"></div>
+  </main>
+  <script>
+    const lessons = [
+      { id: 1, name: 'Finding Fossil Man', file: '01-finding-fossil-man.html' },
+      { id: 2, name: 'Spare That Spider', file: '02-spare-that-spider.html' },
+      { id: 3, name: 'Matterhorn Man', file: '03-matterhorn-man.html' },
+      { id: 4, name: 'Seeing Hands', file: '04-seeing-hands.html' },
+      { id: 5, name: 'Youth', file: '05-youth.html' },
+      { id: 6, name: 'The Sporting Spirit', file: '06-the-sporting-spirit.html' },
+      { id: 7, name: 'Bats', file: '07-bats.html' },
+      { id: 8, name: 'Trading Standards', file: '08-trading-standards.html' },
+      { id: 9, name: 'Royal Espionage', file: '09-royal-espionage.html' },
+      { id: 10, name: 'Silicon Valley', file: '10-silicon-valley.html' },
+      { id: 11, name: 'How to Grow Old', file: '11-how-to-grow-old.html' },
+      { id: 12, name: 'Banks and Their Customers', file: '12-banks-and-their-customers.html' },
+      { id: 13, name: 'The Search for Oil', file: '13-the-search-for-oil.html' },
+      { id: 14, name: 'The Butterfly Effect', file: '14-the-butterfly-effect.html' },
+      { id: 15, name: 'Secrecy in Industry', file: '15-secrecy-in-industry.html' },
+      { id: 16, name: 'The Modern City', file: '16-the-modern-city.html' },
+      { id: 17, name: 'A Man-made Disease', file: '17-a-man-made-disease.html' },
+      { id: 18, name: 'Porpoises', file: '18-porpoises.html' },
+      { id: 19, name: 'The Stuff of Dreams', file: '19-the-stuff-of-dreams.html' },
+      { id: 20, name: 'Snake Poison', file: '20-snake-poison.html' },
+    ];
+    
+    const list = document.getElementById('lessonList');
+    lessons.forEach((l, i) => {
+      const a = document.createElement('a');
+      a.className = 'lesson-item';
+      a.href = l.file;
+      a.innerHTML = `<h3>Lesson ${l.id}</h3><p>${l.name}</p>`;
+      list.appendChild(a);
+    });
+    
+    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>

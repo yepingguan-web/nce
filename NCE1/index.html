@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCE1 - 新概念英语第一册</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <link rel="manifest" href="../manifest.json">
+  <style>
+    .lesson-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+      padding: 1rem;
+    }
+    .lesson-item {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 2px 8px var(--shadow);
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+    .lesson-item:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px var(--shadow);
+    }
+    .lesson-item h3 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+      font-size: 1.1rem;
+    }
+    .lesson-item p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+    .lesson-item .lesson-meta {
+      display: flex;
+      gap: 1rem;
+      margin-top: 0.8rem;
+      font-size: 0.85rem;
+      color: var(--text-tertiary);
+    }
+    .lesson-item .lesson-meta span {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="../index.html" class="back-btn">← 返回首页</a>
+      <h1 class="nav-title">📚 NCE 第一册</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="切换主题">🌓</button>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main class="container">
+    <section class="welcome-section">
+      <h2>新概念英语第一册 - 英语初阶</h2>
+      <p class="subtitle">共 72 课 | 基础对话与短文</p>
+    </section>
+
+    <div class="lesson-list" id="lessonList">
+      <!-- 课程列表由 JavaScript 动态生成 -->
+    </div>
+  </main>
+
+  <script>
+    // 课程数据
+    const lessons = [
+      { id: '001-002', name: 'Excuse Me', file: '001-002-excuse-me.html', audio: '001&002－Excuse Me..mp3' },
+      { id: '003-004', name: 'Sorry, Sir.', file: '003-004-sorry-sir.html', audio: '003&004－Sorry, Sir..mp3' },
+      { id: '005-006', name: 'Nice to Meet You', file: '005-006-nice-to-meet-you.html', audio: '005&006－Nice to Meet You..mp3' },
+      { id: '007-008', name: 'Are You a Teacher?', file: '007-008-are-you-a-teacher.html', audio: '007&008－Are You a Teacher.mp3' },
+      { id: '009-010', name: 'How Are You Today?', file: '009-010-how-are-you-today.html', audio: '009&010－How Are You Today.mp3' },
+      { id: '011-012', name: 'Is This Your Shirt?', file: '011-012-is-this-your-shirt.html', audio: '011&012－Is This Your Shirt.mp3' },
+      { id: '013-014', name: 'A New Dress', file: '013-014-a-new-dress.html', audio: '013&014－A New Dress.mp3' },
+      { id: '015-016', name: 'Your Passports, Please?', file: '015-016-your-passports-please.html', audio: '015&016－Your Passports, Please..mp3' },
+      { id: '017-018', name: 'How do you do?', file: '017-018-how-do-you-do.html', audio: '017&018－How do you do.mp3' },
+      { id: '019-020', name: 'Tired and Thirsty', file: '019-020-tired-and-thirsty.html', audio: '019&020－Tired and Thirsty.mp3' },
+      { id: '021-022', name: 'Which Book?', file: '021-022-which-book.html', audio: '021&022－Which Book.mp3' },
+      { id: '023-024', name: 'Which Glasses?', file: '023-024-which-glasses.html', audio: '023&024－Which Glasses.mp3' },
+      { id: '025-026', name: "Mrs. Smith's Kitchen", file: '025-026-mrs-smith-s-kitchen.html', audio: '025&026－Mrs. Smith\'s Kitchen.mp3' },
+      { id: '027-028', name: "Mrs. Smith's Living Room", file: '027-028-mrs-smith-s-living-room.html', audio: '027&028－Mrs. Smith\'s Living Room.mp3' },
+      { id: '029-030', name: 'Come In, Amy.', file: '029-030-come-in-amy.html', audio: '029&030－Come In, Amy..mp3' },
+      { id: '031-032', name: "Where's Sally?", file: '031-032-where-s-sally.html', audio: '031&032－Where\'s Sally.mp3' },
+      { id: '033-034', name: 'A Fine Day', file: '033-034-a-fine-day.html', audio: '033&034－A Fine Day.mp3' },
+      { id: '035-036', name: 'Our Village', file: '035-036-our-village.html', audio: '035&036－Our Village.mp3' },
+      { id: '037-038', name: 'Making a Bookcase', file: '037-038-making-a-bookcase.html', audio: '037&038－Making a Bookcase.mp3' },
+      { id: '039-040', name: "Don't Drop It", file: '039-040-don-t-drop-it.html', audio: '039&040－Don\'t Drop It.mp3' },
+      { id: '041-042', name: "Penny's Bag", file: '041-042-penny-s-bag.html', audio: '041&042－Penny\'s Bag.mp3' },
+      { id: '043-044', name: 'Hurry Up', file: '043-044-hurry-up.html', audio: '043&044－Hurry Up.mp3' },
+      { id: '045-046', name: "The Boss's Letter", file: '045-046-the-boss-s-letter.html', audio: '045&046－The Boss\'s Letter.mp3' },
+      { id: '047-048', name: 'A Cup of Coffee', file: '047-048-a-cup-of-coffee.html', audio: '047&048－A Cup of Coffee.mp3' },
+      { id: '049-050', name: "At the Butcher's", file: '049-050-at-the-butcher-s.html', audio: '049&050－At the Butcher\'s.mp3' },
+      { id: '051-052', name: 'A Pleasant Climate', file: '051-052-a-pleasant-climate.html', audio: '051&052－A Pleasant Climate.mp3' },
+      { id: '053-054', name: 'An Interesting Climate', file: '053-054-an-interesting-climate.html', audio: '053&054－An Interesting Climate.mp3' },
+      { id: '055-056', name: 'The Sawyer Family', file: '055-056-the-sawyer-family.html', audio: '055&056－The Sawyer Family.mp3' },
+      { id: '057-058', name: 'An Unusual Day', file: '057-058-an-unusual-day.html', audio: '057&058－An Unusual Day.mp3' },
+      { id: '059-060', name: 'Is That All?', file: '059-060-is-that-all.html', audio: '059&060－Is That All.mp3' },
+      { id: '061-062', name: 'A Bad Cold', file: '061-062-a-bad-cold.html', audio: '061&062－A Bad Cold.mp3' },
+      { id: '063-064', name: 'Thank You, Doctor.', file: '063-064-thank-you-doctor.html', audio: '063&064－Thank You, Doctor..mp3' },
+      { id: '065-066', name: 'Not a Baby', file: '065-066-not-a-baby.html', audio: '065&066－Not a Baby.mp3' },
+      { id: '067-068', name: 'The Weekend', file: '067-068-the-weekend.html', audio: '067&068－The Weekend.mp3' },
+      { id: '069-070', name: 'The Car Race', file: '069-070-the-car-race.html', audio: '069&070－The Car Race.mp3' },
+      { id: '071-072', name: "He's Awful", file: '071-072-he-s-awful.html', audio: '071&072－He\'s Awful.mp3' },
+      { id: '073-074', name: 'The Way to King Street', file: '073-074-the-way-to-king-street.html', audio: '073&074－The Way to King Street.mp3' },
+      { id: '075-076', name: 'Uncomfortable Shoes', file: '075-076-uncomfortable-shoes.html', audio: '075&076－Uncomfortable Shoes.mp3' },
+      { id: '077-078', name: 'Terrible Toothache', file: '077-078-terrible-toothache.html', audio: '077&078－Terrible Toothache.mp3' },
+      { id: '079-080', name: "Carol's Shopping List", file: '079-080-carol-s-shopping-list.html', audio: '079&080－Carol\'s Shopping List.mp3' },
+      { id: '081-082', name: 'Roast Beef and Potatoes', file: '081-082-roast-beef-and-potatoes.html', audio: '081&082－Roast Beef and Potatoes.mp3' },
+      { id: '083-084', name: 'Going on Holiday', file: '083-084-going-on-holiday.html', audio: '083&084－Going on Holiday.mp3' },
+      { id: '085-086', name: 'Paris in the Spring', file: '085-086-paris-in-the-spring.html', audio: '085&086－Paris in the Spring..mp3' },
+      { id: '087-088', name: 'A Car Crash', file: '087-088-a-car-crash.html', audio: '087&088－A Car Crash.mp3' },
+      { id: '089-090', name: 'For Sale', file: '089-090-for-sale.html', audio: '089&090－For Sale.mp3' },
+      { id: '091-092', name: 'Poor Ian', file: '091-092-poor-ian.html', audio: '091&092－Poor Ian.mp3' },
+      { id: '093-094', name: 'Our New Neighbour', file: '093-094-our-new-neighbour.html', audio: '093&094－Our New Neighbour.mp3' },
+      { id: '095-096', name: 'Tickets, Please.', file: '095-096-tickets-please.html', audio: '095&096－Tickets, Please..mp3' },
+      { id: '097-098', name: 'A Small Blue Case', file: '097-098-a-small-blue-case.html', audio: '097&098－A Small Blue Case.mp3' },
+      { id: '099-100', name: 'Ow!', file: '099-100-ow.html', audio: '099&100－Ow.mp3' },
+      { id: '101-102', name: 'A Card From Jimmy', file: '101-102-a-card-from-jimmy.html', audio: '101&102－A Card From Jimmy.mp3' },
+      { id: '103-104', name: 'The French Test', file: '103-104-the-french-test.html', audio: '103&104－The French Test.mp3' },
+      { id: '105-106', name: 'Full of Mistakes', file: '105-106-full-of-mistakes.html', audio: '105&106－Full of Mistakes.mp3' },
+      { id: '107-108', name: "It's Too Small.", file: '107-108-it-s-too-small.html', audio: '107&108－It\'s Too Small..mp3' },
+      { id: '109-110', name: 'A Good Idea', file: '109-110-a-good-idea.html', audio: '109&110－A Good Idea.mp3' },
+      { id: '111-112', name: 'The Most Expensive Model', file: '111-112-the-most-expensive-model.html', audio: '111&112－The Most Expensive Model.mp3' },
+      { id: '113-114', name: 'Small Change', file: '113-114-small-change.html', audio: '113&114－Small Change.mp3' },
+      { id: '115-116', name: 'Knock, Knock', file: '115-116-knock-knock.html', audio: '115&116－Knock, Knock.mp3' },
+      { id: '117-118', name: " Tommy's Breakfast", file: '117-118-tommy-s-breakfast.html', audio: '117&118－Tommy\'s Breakfast.mp3' },
+      { id: '119-120', name: 'A True Story', file: '119-120-a-true-story.html', audio: '119&120－A True Story.mp3' },
+      { id: '121-122', name: 'The Man in a Hat', file: '121-122-the-man-in-a-hat.html', audio: '121&122－The Man in a Hat.mp3' },
+      { id: '123-124', name: 'A Trip to Australia', file: '123-124-a-trip-to-australia.html', audio: '123&124－A Trip to Australia.mp3' },
+      { id: '125-126', name: 'Tea for Two', file: '125-126-tea-for-two.html', audio: '125&126－Tea for Two.mp3' },
+      { id: '127-128', name: 'A Famous Actress', file: '127-128-a-famous-actress.html', audio: '127&128－A Famous Actress.mp3' },
+      { id: '129-130', name: 'Seventy Miles an Hour', file: '129-130-seventy-miles-an-hour.html', audio: '129&130－Seventy Miles an Hour.mp3' },
+      { id: '131-132', name: "Don't be So Sure", file: '131-132-don-t-be-so-sure.html', audio: '131&132－Don\'t be So Sure.mp3' },
+      { id: '133-134', name: 'Sensational News', file: '133-134-sensational-news.html', audio: '133&134－Sensational News.mp3' },
+      { id: '135-136', name: 'The Latest Report', file: '135-136-the-latest-report.html', audio: '135&136－The Latest Report.mp3' },
+      { id: '137-138', name: 'A Pleasant Dream', file: '137-138-a-pleasant-dream.html', audio: '137&138－A Pleasant Dream.mp3' },
+      { id: '139-140', name: 'Is That You, John?', file: '139-140-is-that-you-john.html', audio: '139&140－Is That You, John.mp3' },
+      { id: '141-142', name: "Sally's First Train Ride", file: '141-142-sally-s-first-train-ride.html', audio: '141&142－Sally\'s First Train Ride.mp3' },
+      { id: '143-144', name: 'A Walk Through the Woods', file: '143-144-a-walk-through-the-woods.html', audio: '143&144－A Walk Through the Woods.mp3' },
+    ];
+
+    // 渲染课程列表
+    const lessonList = document.getElementById('lessonList');
+    
+    lessons.forEach((lesson, index) => {
+      const item = document.createElement('a');
+      item.className = 'lesson-item';
+      item.href = lesson.file;
+      item.innerHTML = `
+        <h3>Lesson ${index + 1}</h3>
+        <p>${lesson.id} - ${lesson.name}</p>
+        <div class="lesson-meta">
+          <span>📖 课文</span>
+          <span>🎧 音频</span>
+        </div>
+      `;
+      lessonList.appendChild(item);
+    });
+
+    // 主题切换
+    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('nce-theme', newTheme);
+    });
+  </script>
+</body>
+</html>

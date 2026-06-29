@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCE3 - 新概念英语第三册</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .lesson-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; padding: 1rem; }
+    .lesson-item { background: var(--bg-primary); border-radius: 12px; padding: 1.5rem; box-shadow: 0 2px 8px var(--shadow); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: block; }
+    .lesson-item:hover { transform: translateY(-4px); box-shadow: 0 8px 20px var(--shadow); }
+    .lesson-item h3 { color: var(--accent); margin-bottom: 0.5rem; font-size: 1.1rem; }
+    .lesson-item p { color: var(--text-secondary); font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a href="../index.html" class="back-btn">← 返回首页</a>
+      <h1 class="nav-title">📚 NCE 第三册</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="切换主题">🌓</button>
+    </div>
+  </nav>
+  <main class="container">
+    <section class="welcome-section">
+      <h2>新概念英语第三册 - 培养技能</h2>
+      <p class="subtitle">共 60 课 | 中篇文章</p>
+    </section>
+    <div class="lesson-list" id="lessonList"></div>
+  </main>
+  <script>
+    const lessons = [
+      { id: 1, name: 'A Puma at Large', file: '01-a-puma-at-large.html' },
+      { id: 2, name: 'Thirteen Equals One', file: '02-thirteen-equals-one.html' },
+      { id: 3, name: 'An Unknown Goddess', file: '03-an-unknown-goddess.html' },
+      { id: 4, name: 'The Double Life of Alfred Bloggs', file: '04-the-double-life-of-alfred-bloggs.html' },
+      { id: 5, name: 'The Facts', file: '05-the-facts.html' },
+      { id: 6, name: 'Smash-and-Grab', file: '06-smash-and-grab.html' },
+      { id: 7, name: 'Mutilated Ladies', file: '07-mutilated-ladies.html' },
+      { id: 8, name: 'A Famous Monastery', file: '08-a-famous-monastery.html' },
+      { id: 9, name: 'Flying Cats', file: '09-flying-cats.html' },
+      { id: 10, name: 'The Loss of the Titanic', file: '10-the-loss-of-the-titanic.html' },
+      { id: 11, name: 'Not Guilty', file: '11-not-guilty.html' },
+      { id: 12, name: 'Life on a Desert Island', file: '12-life-on-a-desert-island.html' },
+      { id: 13, name: "It's Only Me", file: '13-it-s-only-me.html' },
+      { id: 14, name: 'A Noble Gangster', file: '14-a-noble-gangster.html' },
+      { id: 15, name: 'Fifty Pence Worth of Trouble', file: '15-fifty-pence-worth-of-trouble.html' },
+      { id: 16, name: 'Mary Had a Little Lamb', file: '16-mary-had-a-little-lamb.html' },
+      { id: 17, name: 'The Longest Suspension Bridge in the World', file: '17-the-longest-suspension-bridge-in-the-world.html' },
+      { id: 18, name: 'Electric Currents in Modern Art', file: '18-electric-currents-in-modern-art.html' },
+      { id: 19, name: 'A Very Dear Cat', file: '19-a-very-dear-cat.html' },
+      { id: 20, name: 'Pioneer Pilots', file: '20-pioneer-pilots.html' },
+    ];
+    
+    const list = document.getElementById('lessonList');
+    lessons.forEach((l, i) => {
+      const a = document.createElement('a');
+      a.className = 'lesson-item';
+      a.href = l.file;
+      a.innerHTML = `<h3>Lesson ${l.id}</h3><p>${l.name}</p>`;
+      list.appendChild(a);
+    });
+    
+    document.querySelector('.theme-toggle')?.addEventListener('click', () => {
+      const t = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', t === 'dark' ? 'light' : 'dark');
+    });
+  </script>
+</body>
+</html>
