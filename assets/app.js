@@ -41,6 +41,11 @@ class NCEApp {
       this.isPlaying = (state === 'playing');
       this.updatePlayUI();
     });
+    this.audioPlayer.onError((msg) => {
+      this.isPlaying = false;
+      this.updatePlayUI();
+      this.showNotification('播放失败：' + msg, 'error');
+    });
 
     // 3. 加载课文数据
     const hash = window.location.hash;
@@ -560,6 +565,10 @@ class NCEApp {
 
     // 播放控制
     document.getElementById('playBtn')?.addEventListener('click', () => {
+      if (!this.sentences.length) {
+        this.showNotification('没有课文数据，无法播放', 'warning');
+        return;
+      }
       this.audioPlayer.playFull();
     });
 

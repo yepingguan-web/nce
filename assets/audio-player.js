@@ -14,6 +14,7 @@ class AudioPlayer {
     this._onSentenceChange = null;
     this._onEnd = null;
     this._onStateChange = null;
+    this._onError = null;
   }
 
   /**
@@ -25,8 +26,26 @@ class AudioPlayer {
     this.pause();
     this.sentences = sentences || [];
     this.currentIndex = -1;
-    this.audio.src = mp3Path;
+    // URL-encode special characters in the path (preserving /)
+    this.audio.src = encodeURI(mp3Path);
     this.audio.load();
+  }
+
+  /**
+   * 安全设置 currentTime，避免 readyState=0 时抛出异常
+   * @param {number} time - 目标时间（秒）
+   */
+  _safeSeek(time) {
+    if (this.audio.readyState > 0) {
+      this.audio.currentTime = time;
+    } else {
+      // 如果元数据还未加载，等加载完成后再 seek
+      const onReady = () => {
+        this.audio.currentTime = time;
+        this.audio.removeEventListener('loadedmetadata', onReady);
+      };
+      this.audio.addEventListener('loadedmetadata', onReady);
+    }
   }
 
   /**
@@ -37,7 +56,7 @@ class AudioPlayer {
     if (index < 0 || index >= this.sentences.length) return;
     const sentence = this.sentences[index];
     this.currentIndex = index;
-    this.audio.currentTime = sentence.startTime;
+    this._safeSeek(sentence.startTime);
     this._play();
     this._startSingleMonitoring(index);
   }
@@ -47,7 +66,7 @@ class AudioPlayer {
    */
   playFull() {
     this.currentIndex = 0;
-    this.audio.currentTime = 0;
+    this._safeSeek(0);
     this._play();
     this._startMonitoring();
   }
@@ -91,7 +110,7 @@ class AudioPlayer {
    * @param {number} seconds
    */
   seekTo(seconds) {
-    this.audio.currentTime = Math.max(0, seconds);
+    this._safeSeek(Math.max(0, seconds));
   }
 
   /**
@@ -131,10 +150,18 @@ class AudioPlayer {
 
   /**
    * 状态变化回调
-   * @param {function} cb - callback(state: 'playing'|'paused'|'ended')
+   * @param {function} cb - callback(state: 'playing'|'paused'|'ended'|'error')
    */
   onStateChange(cb) {
     this._onStateChange = cb;
+  }
+
+  /**
+   * 播放错误回调
+   * @param {function} cb - callback(errorMessage)
+   */
+  onError(cb) {
+    this._onError = cb;
   }
 
   /**
@@ -148,6 +175,7 @@ class AudioPlayer {
     this._onSentenceChange = null;
     this._onEnd = null;
     this._onStateChange = null;
+    this._onError = null;
   }
 
   // ─── 内部方法 ───
@@ -155,11 +183,21 @@ class AudioPlayer {
   _play() {
     const promise = this.audio.play();
     if (promise) {
-      promise.catch(err => {
+      promise.then(() => {
+        console.log('✅ 音频开始播放');
+        this._notifyState('playing');
+      }).catch(err => {
         console.warn('⚠ 音频播放失败:', err.message);
+        this._stopMonitoring();
+        this._notifyState('error');
+        if (this._onError) {
+          this._onError(err.message || '播放失败，请检查音频文件是否存在');
+        }
       });
+    } else {
+      // 旧版浏览器不支持 play() 返回 Promise
+      this._notifyState('playing');
     }
-    this._notifyState('playing');
   }
 
   // 连续播放模式：自动推进到下一句

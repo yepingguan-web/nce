@@ -33,10 +33,10 @@ class LessonLoader {
     const lrcPath = `${bookDir}/${lessonId}.lrc`;
     const mp3Path = `${bookDir}/${lessonId}.mp3`;
 
-    // 加载 LRC 文件
+    // 加载 LRC 文件（编码特殊字符）
     let lrcText;
     try {
-      const response = await fetch(lrcPath);
+      const response = await fetch(encodeURI(lrcPath));
       if (!response.ok) {
         throw new Error(`LRC 文件不存在 (${response.status})`);
       }
