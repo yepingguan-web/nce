@@ -1,0 +1,31 @@
+{
+  "book": 1,
+  "lesson": 1,
+  "title": "A Private Conversation",
+  "sentences": [
+    {
+      "id": "s1",
+      "en": "Last week I went to the theatre.",
+      "cn": "上周我去看戏。",
+      "audio": "../../NCE1/lesson01/s1.mp3"
+    },
+    {
+      "id": "s2",
+      "en": "I had a very good seat.",
+      "cn": "我的座位很好。",
+      "audio": "../../NCE1/lesson01/s2.mp3"
+    },
+    {
+      "id": "s3",
+      "en": "The play was very interesting.",
+      "cn": "剧情很有趣。",
+      "audio": "../../NCE1/lesson01/s3.mp3"
+    },
+    {
+      "id": "s4",
+      "en": "I did not enjoy it.",
+      "cn": "但我并不喜欢它。",
+      "audio": "../../NCE1/lesson01/s4.mp3"
+    }
+  ]
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NCE-Flow-Plus - 新概念英语在线点读（增强版）</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- 顶部导航 -->
+  <nav class="navbar">
+    <div class="nav-brand">
+      <h1>📚 NCE-Flow-Plus</h1>
+    </div>
+    <div class="nav-actions">
+      <button class="theme-toggle" title="切换主题">🌓</button>
+      <button class="help-btn" title="使用帮助">❓</button>
+    </div>
+  </nav>
+
+  <!-- 主内容区 -->
+  <main class="container">
+    <!-- 欢迎区域 -->
+    <section class="welcome-section">
+      <h2>🎉 欢迎使用 NCE-Flow-Plus</h2>
+      <p class="subtitle">新概念英语在线点读 <strong>增强版</strong></p>
+      <p class="features">✨ 支持句子跟读与发音评分</p>
+    </section>
+
+    <!-- 功能卡片 -->
+    <section class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎯</div>
+        <h3>句子级点读</h3>
+        <p>点击任意句子开始播放，自动高亮跟随</p>
+      </div>
+      
+      <div class="feature-card highlighted">
+        <div class="feature-icon">🎤</div>
+        <h3>句子跟读</h3>
+        <p>录制自己的发音，与原音对比</p>
+      </div>
+      
+      <div class="feature-card highlighted">
+        <div class="feature-icon">📊</div>
+        <h3>发音评分</h3>
+        <p>实时评分，给出改进建议</p>
+      </div>
+      
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h3>播放控制</h3>
+        <p>倍速调节、循环模式、断点续播</p>
+      </div>
+    </section>
+
+    <!-- 选择教材 -->
+    <section class="books-section">
+      <h2>选择教材</h2>
+      <div class="books-grid">
+        <div class="book-card" data-book="1">
+          <img src="images/book1.jpg" alt="新概念英语第一册">
+          <h3>第一册</h3>
+          <p>英语初阶 - 基础对话</p>
+          <button class="btn-start">开始学习</button>
+        </div>
+        
+        <div class="book-card" data-book="2">
+          <img src="images/book2.jpg" alt="新概念英语第二册">
+          <h3>第二册</h3>
+          <p>实践与进步 - 短文阅读</p>
+          <button class="btn-start">开始学习</button>
+        </div>
+        
+        <div class="book-card" data-book="3">
+          <img src="images/book3.jpg" alt="新概念英语第三册">
+          <h3>第三册</h3>
+          <p>培养技能 - 中篇文章</p>
+          <button class="btn-start">开始学习</button>
+        </div>
+        
+        <div class="book-card" data-book="4">
+          <img src="images/book4.jpg" alt="新概念英语第四册">
+          <h3>第四册</h3>
+          <p>流利英语 - 长篇文章</p>
+          <button class="btn-start">开始学习</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 使用说明 -->
+    <section class="guide-section">
+      <h2>🎤 跟读功能使用说明</h2>
+      <div class="guide-steps">
+        <div class="step">
+          <span class="step-number">1</span>
+          <p>点击句子旁边的 <strong>"🎤 跟读"</strong> 按钮</p>
+        </div>
+        <div class="step">
+          <span class="step-number">2</span>
+          <p>允许浏览器访问麦克风</p>
+        </div>
+        <div class="step">
+          <span class="step-number">3</span>
+          <p>听到提示音后，开始跟读句子</p>
+        </div>
+        <div class="step">
+          <span class="step-number">4</span>
+          <p>系统自动录制并评分</p>
+        </div>
+        <div class="step">
+          <span class="step-number">5</span>
+          <p>查看评分结果和改进建议</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- 页脚 -->
+  <footer class="footer">
+    <p>Made with ❤️ for English learners</p>
+    <p>基于 <a href="https://github.com/luzhenhua/NCE-Flow" target="_blank">NCE-Flow</a> 增强而来</p>
+  </footer>
+
+  <script src="assets/recorder.js"></script>
+  <script src="assets/scorer.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>

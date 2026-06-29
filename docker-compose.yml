@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  nce-flow-plus:
+    build: .
+    container_name: nce-flow-plus
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+    volumes:
+      # 可选：挂载本地数据目录（如果需要动态更新）
+      # - ./static:/usr/share/nginx/html/static:ro
+      # - ./NCE1:/usr/share/nginx/html/NCE1:ro
+    environment:
+      - TZ=Asia/Shanghai
+    networks:
+      - nce-network
+
+  # 可选：添加 SSL 反向代理（生产环境）
+  # nginx-ssl:
+  #   image: nginx:alpine
+  #   container_name: nce-ssl
+  #   ports:
+  #     - "443:443"
+  #     - "80:80"
+  #   volumes:
+  #     - ./ssl.conf:/etc/nginx/conf.d/default.conf
+  #     - ./certificates:/etc/nginx/certificates
+  #   depends_on:
+  #     - nce-flow-plus
+  #   networks:
+  #     - nce-network
+
+networks:
+  nce-network:
+    driver: bridge

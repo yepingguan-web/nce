@@ -1,0 +1,47 @@
+# NCE-Flow-Plus .gitignore
+
+# 系统文件
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# 编辑器文件
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 临时文件
+*.log
+*.tmp
+*.cache
+*.pid
+
+# 依赖（如果有）
+node_modules/
+venv/
+__pycache__/
+
+# 音频文件（如果太大，不提交到 Git）
+# NCE1/*.mp3
+# NCE2/*.mp3
+# NCE3/*.mp3
+# NCE4/*.mp3
+
+# 环境变量
+.env
+.env.local
+
+# 构建产物
+dist/
+build/
+.cache/
+
+# 测试覆盖率
+coverage/
+*.lcov
