@@ -206,40 +206,32 @@ class NCEApp {
 
     this.currentSentence = sentenceIndex;
     this.isFollowReading = true;
-    this.updateFollowReadUI(sentenceIndex, 'playing');
+    this.updateFollowReadUI(sentenceIndex, 'recording');
 
     try {
-      // Step 1: 播放原音
-      this.audioPlayer.playSentence(sentenceIndex);
-      const sentence = this.sentences[sentenceIndex];
-      const duration = ((sentence.endTime - sentence.startTime) * 1000) + 500;
-      await this._sleep(duration);
-
-      // Step 2: 播放提示音
+      // Step 1: 播放提示音
       this.playBeep();
       await this._sleep(400);
 
-      // Step 3: 初始化录音器（需要用户手势上下文）
+      // Step 2: 初始化录音器（需要用户手势上下文）
       if (!this.recorder.stream) {
         await this.recorder.init();
       }
 
-      // Step 4: 开始录音和语音识别
-      this.updateFollowReadUI(sentenceIndex, 'recording');
+      // Step 3: 开始录音和语音识别
       await this.recorder.startRecording();
 
       // 初始化评分器（如果需要）
       try {
         this.scorer.startRecognition(originalText);
       } catch (e) {
-        // 如果识别器初始化失败（如不支持），至少还有录音
         console.warn('⚠ 语音识别不可用:', e.message);
       }
 
-      // Step 5: 等待语音识别结束（用户停止说话或超时）
+      // Step 4: 等待语音识别结束（用户停止说话或超时）
       await this._waitForRecognition(10000);
 
-      // Step 6: 停止并获取结果
+      // Step 5: 停止并获取结果
       await this.stopFollowRead(sentenceIndex);
     } catch (error) {
       console.error('❌ 跟读失败:', error);
@@ -360,11 +352,6 @@ class NCEApp {
         btn.textContent = '🎤 跟读';
         btn.disabled = false;
         btn.classList.remove('recording');
-        break;
-      case 'playing':
-        btn.textContent = '🔊 播放原音...';
-        btn.disabled = true;
-        btn.classList.add('recording');
         break;
       case 'recording':
         btn.textContent = '🔴 录音中...';

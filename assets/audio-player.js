@@ -30,7 +30,7 @@ class AudioPlayer {
   }
 
   /**
-   * 播放指定句子
+   * 播放指定句子（点读模式：只播当前句，播完停止）
    * @param {number} index - 句子索引
    */
   playSentence(index) {
@@ -39,7 +39,7 @@ class AudioPlayer {
     this.currentIndex = index;
     this.audio.currentTime = sentence.startTime;
     this._play();
-    this._startMonitoring();
+    this._startSingleMonitoring(index);
   }
 
   /**
@@ -162,6 +162,7 @@ class AudioPlayer {
     this._notifyState('playing');
   }
 
+  // 连续播放模式：自动推进到下一句
   _startMonitoring() {
     this._stopMonitoring();
     this._monitorId = setInterval(() => {
@@ -184,13 +185,27 @@ class AudioPlayer {
           // 播放完毕
           this._stopMonitoring();
           if (this.loopMode) {
-            // 循环：回到开头
             this.playFull();
           } else {
             this._notifyState('ended');
             if (this._onEnd) this._onEnd();
           }
         }
+      }
+    }, 100);
+  }
+
+  // 单句播放模式：播完当前句就停止
+  _startSingleMonitoring(index) {
+    this._stopMonitoring();
+    const sentence = this.sentences[index];
+    if (!sentence) return;
+
+    this._monitorId = setInterval(() => {
+      if (this.audio.currentTime >= sentence.endTime) {
+        this.pause();
+        this._notifyState('ended');
+        if (this._onEnd) this._onEnd();
       }
     }, 100);
   }
