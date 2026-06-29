@@ -5,177 +5,372 @@
 
 class NCEApp {
   constructor() {
+    this.audioPlayer = new AudioPlayer();
+    this.recorder = new AudioRecorder();
+    this.scorer = new PronunciationScorer();
     this.currentBook = null;
     this.currentLesson = null;
     this.currentSentence = null;
     this.isPlaying = false;
-    this.playMode = 'point'; // 'point' | 'continuous'
     this.speed = 1.0;
+    this.loopMode = false;
     this.theme = 'auto';
-    
-    // 跟读和评分模块
-    this.recorder = new AudioRecorder();
-    this.scorer = new PronunciationScorer();
     this.isFollowReading = false;
-    
-    // 学习记录
+    this.sentences = [];
     this.history = this.loadHistory();
   }
 
   /**
    * 初始化应用
    */
-  init() {
+  async init() {
     console.log('🚀 NCE-Flow-Plus 初始化...');
-    
-    // 初始化主题
+
+    // 1. 初始化主题
     this.initTheme();
-    
-    // 初始化跟读功能
-    this.initFollowRead();
-    
-    // 绑定事件
+
+    // 2. 设置音频播放器回调
+    this.audioPlayer.onSentenceChange((index) => {
+      this.highlightSentence(index);
+    });
+    this.audioPlayer.onEnd(() => {
+      this.isPlaying = false;
+      this.updatePlayUI();
+    });
+    this.audioPlayer.onStateChange((state) => {
+      this.isPlaying = (state === 'playing');
+      this.updatePlayUI();
+    });
+
+    // 3. 加载课文数据
+    const hash = window.location.hash;
+    if (!hash || hash === '#') {
+      this.showNoLessonState();
+      this.bindEvents();
+      return;
+    }
+
+    document.getElementById('loadingMessage').style.display = 'block';
+
+    try {
+      const lessonData = await LessonLoader.load();
+      this.currentBook = lessonData.bookDir;
+      this.sentences = lessonData.sentences;
+
+      // 加载音频
+      this.audioPlayer.load(lessonData.mp3Path, lessonData.sentences);
+
+      // 渲染句子列表
+      this.renderSentences();
+
+      // 更新导航标题
+      document.getElementById('navTitle').textContent = lessonData.title;
+
+      // 更新播放控制栏的音频来源信息
+      document.getElementById('loadingMessage').style.display = 'none';
+    } catch (error) {
+      console.error('❌ 课文加载失败:', error);
+      document.getElementById('loadingMessage').style.display = 'none';
+      this.showError('加载课文失败：' + error.message);
+    }
+
+    // 4. 绑定事件
     this.bindEvents();
-    
+
     console.log('✅ 应用初始化完成');
   }
 
   /**
-   * 初始化跟读功能
+   * 渲染句子列表
    */
-  async initFollowRead() {
-    try {
-      // 初始化录音模块
-      await this.recorder.init();
-      console.log('✅ 录音模块已初始化');
-      
-      // 初始化评分模块
-      this.scorer.init();
-      console.log('✅ 评分模块已初始化');
-    } catch (error) {
-      console.error('❌ 跟读功能初始化失败:', error);
-      this.showNotification('跟读功能不可用：' + error.message, 'error');
+  renderSentences() {
+    const container = document.getElementById('sentencesList');
+    container.innerHTML = '';
+
+    this.sentences.forEach((sentence, index) => {
+      const item = document.createElement('div');
+      item.className = 'sentence-item';
+      item.dataset.sentenceIndex = index;
+      item.dataset.originalText = sentence.en;
+
+      item.innerHTML = `
+        <div class="sentence-header">
+          <span class="sentence-number">${index + 1}</span>
+          <button class="play-sentence-btn" title="播放此句">▶</button>
+          <button class="follow-read-btn" title="跟读此句">🎤 跟读</button>
+        </div>
+        <div class="sentence-content">
+          <div class="text-en">${this.escapeHtml(sentence.en)}</div>
+          <div class="text-cn" style="display: none;">${this.escapeHtml(sentence.cn)}</div>
+        </div>
+        <div class="sentence-actions">
+          <button class="action-btn favorite-btn" title="收藏">☆</button>
+          <button class="action-btn" title="加入清单">📋</button>
+        </div>
+        <div class="score-result" style="display: none;">
+          <div class="score-badge">📊 上次评分：<span class="score-value">--</span> 分</div>
+          <button class="view-detail-btn">查看详情</button>
+        </div>
+      `;
+
+      container.appendChild(item);
+
+      // 恢复之前的评分记录
+      this.restoreScoreRecord(index, item);
+    });
+  }
+
+  /**
+   * 恢复评分记录
+   */
+  restoreScoreRecord(index, item) {
+    const record = this.history.records
+      ?.filter(r => r.sentenceIndex === index)
+      ?.sort((a, b) => b.timestamp - a.timestamp)?.[0];
+    if (record && record.score > 0) {
+      const scoreEl = item.querySelector('.score-result');
+      if (scoreEl) {
+        scoreEl.style.display = 'block';
+        scoreEl.querySelector('.score-value').textContent = record.score;
+      }
+    }
+  }
+
+  /**
+   * HTML 转义
+   */
+  escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  /**
+   * 播放指定句子（点读）
+   */
+  playSentence(index) {
+    if (index < 0 || index >= this.sentences.length) return;
+    this.currentSentence = index;
+    this.audioPlayer.playSentence(index);
+    this.highlightSentence(index);
+  }
+
+  /**
+   * 高亮当前句子
+   */
+  highlightSentence(index) {
+    document.querySelectorAll('.sentence-item').forEach((el, i) => {
+      el.classList.toggle('active', i === index);
+    });
+  }
+
+  /**
+   * 播放原音
+   */
+  playOriginal(sentenceIndex) {
+    this.audioPlayer.playSentence(sentenceIndex);
+  }
+
+  /**
+   * 播放跟读录音
+   */
+  playRecording(sentenceIndex) {
+    const audio = this.recorder.playRecording();
+    if (!audio) {
+      this.showNotification('没有可播放的录音', 'warning');
+    }
+  }
+
+  /**
+   * 切换跟读
+   */
+  toggleFollowRead(sentenceIndex, originalText) {
+    if (this.isFollowReading) {
+      // 已经在跟读中，手动停止
+      this._cancelFollowRead(sentenceIndex);
+    } else {
+      this.startFollowRead(sentenceIndex, originalText);
     }
   }
 
   /**
    * 开始跟读
-   * @param {string} sentenceId - 句子 ID
-   * @param {string} originalText - 原句文本
    */
-  async startFollowRead(sentenceId, originalText) {
-    console.log('🎤 开始跟读:', sentenceId);
-    
-    this.currentSentence = sentenceId;
+  async startFollowRead(sentenceIndex, originalText) {
+    if (this.isFollowReading) return;
+    if (!originalText) {
+      originalText = this.sentences[sentenceIndex]?.en || '';
+    }
+
+    console.log('🎤 开始跟读:', sentenceIndex, originalText);
+
+    this.currentSentence = sentenceIndex;
     this.isFollowReading = true;
-    
-    // 更新 UI
-    this.updateFollowReadUI(sentenceId, 'recording');
-    
-    // 播放提示音
-    this.playBeep();
-    
-    // 延迟 500ms 后开始录音
-    setTimeout(async () => {
-      try {
-        // 开始录音
-        await this.recorder.startRecording();
-        
-        // 开始语音识别
-        this.scorer.startRecognition(originalText);
-        
-        // 3秒后自动停止
-        setTimeout(async () => {
-          await this.stopFollowRead(sentenceId);
-        }, 3000);
-        
-      } catch (error) {
-        console.error('❌ 跟读失败:', error);
-        this.showNotification('跟读失败：' + error.message, 'error');
-        this.isFollowReading = false;
-        this.updateFollowReadUI(sentenceId, 'idle');
+    this.updateFollowReadUI(sentenceIndex, 'playing');
+
+    try {
+      // Step 1: 播放原音
+      this.audioPlayer.playSentence(sentenceIndex);
+      const sentence = this.sentences[sentenceIndex];
+      const duration = ((sentence.endTime - sentence.startTime) * 1000) + 500;
+      await this._sleep(duration);
+
+      // Step 2: 播放提示音
+      this.playBeep();
+      await this._sleep(400);
+
+      // Step 3: 初始化录音器（需要用户手势上下文）
+      if (!this.recorder.stream) {
+        await this.recorder.init();
       }
-    }, 500);
+
+      // Step 4: 开始录音和语音识别
+      this.updateFollowReadUI(sentenceIndex, 'recording');
+      await this.recorder.startRecording();
+
+      // 初始化评分器（如果需要）
+      try {
+        this.scorer.startRecognition(originalText);
+      } catch (e) {
+        // 如果识别器初始化失败（如不支持），至少还有录音
+        console.warn('⚠ 语音识别不可用:', e.message);
+      }
+
+      // Step 5: 等待语音识别结束（用户停止说话或超时）
+      await this._waitForRecognition(10000);
+
+      // Step 6: 停止并获取结果
+      await this.stopFollowRead(sentenceIndex);
+    } catch (error) {
+      console.error('❌ 跟读失败:', error);
+      this.showNotification('跟读失败：' + error.message, 'error');
+      this.isFollowReading = false;
+      this.updateFollowReadUI(sentenceIndex, 'idle');
+    }
   }
 
   /**
    * 停止跟读
-   * @param {string} sentenceId - 句子 ID
    */
-  async stopFollowRead(sentenceId) {
-    console.log('🎤 停止跟读:', sentenceId);
-    
+  async stopFollowRead(sentenceIndex) {
+    console.log('🎤 停止跟读:', sentenceIndex);
+
     // 停止录音
     const audioBlob = await this.recorder.stopRecording();
-    
-    // 停止语音识别
-    this.scorer.stopRecognition();
-    
-    // 计算评分
-    const scoreResult = this.scorer.calculateScore();
-    
+
+    // 获取评分结果（已在 scorer.onend 中自动计算）
+    const scoreResult = this.scorer.getScore();
+
     // 保存录音
     if (audioBlob) {
-      this.saveRecording(sentenceId, audioBlob);
+      this.saveRecording(sentenceIndex, audioBlob);
     }
-    
+
     // 显示评分结果
-    if (scoreResult) {
-      this.showScoreResult(sentenceId, scoreResult);
+    if (scoreResult && scoreResult.score > 0) {
+      this.showScoreResult(sentenceIndex, scoreResult);
+    } else if (scoreResult && scoreResult.recognizedText) {
+      this.showScoreResult(sentenceIndex, scoreResult);
+    } else {
+      this.showNotification('未检测到语音，请重试', 'warning');
     }
-    
+
     // 更新 UI
     this.isFollowReading = false;
-    this.updateFollowReadUI(sentenceId, 'scored');
-    
-    // 保存到学习记录
-    this.saveLearningRecord(sentenceId, scoreResult);
+    this.updateFollowReadUI(sentenceIndex, 'scored');
+
+    // 保存学习记录
+    if (scoreResult) {
+      this.saveLearningRecord(sentenceIndex, scoreResult);
+    }
+  }
+
+  /**
+   * 取消跟读
+   */
+  async _cancelFollowRead(sentenceIndex) {
+    if (this.scorer.isListening) {
+      this.scorer.stopRecognition();
+    }
+    await this.recorder.stopRecording();
+    this.isFollowReading = false;
+    this.updateFollowReadUI(sentenceIndex, 'idle');
+    this.showNotification('跟读已取消', 'info');
+  }
+
+  /**
+   * 等待语音识别结束
+   */
+  _waitForRecognition(timeout) {
+    return new Promise((resolve) => {
+      const start = Date.now();
+      const check = setInterval(() => {
+        if (!this.scorer.isListening || (Date.now() - start) > timeout) {
+          clearInterval(check);
+          if (this.scorer.isListening) {
+            this.scorer.stopRecognition();
+          }
+          resolve();
+        }
+      }, 200);
+    });
+  }
+
+  /**
+   * 暂停工具函数
+   */
+  _sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   /**
    * 播放提示音
    */
   playBeep() {
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const oscillator = audioContext.createOscillator();
-    const gainNode = audioContext.createGain();
-    
-    oscillator.connect(gainNode);
-    gainNode.connect(audioContext.destination);
-    
-    oscillator.frequency.value = 800;
-    oscillator.type = 'sine';
-    
-    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-    
-    oscillator.start(audioContext.currentTime);
-    oscillator.stop(audioContext.currentTime + 0.1);
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800;
+      oscillator.type = 'sine';
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.15);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.15);
+    } catch (e) {
+      console.warn('⚠ 提示音播放失败:', e.message);
+    }
   }
 
   /**
-   * 更新跟读 UI
-   * @param {string} sentenceId - 句子 ID
-   * @param {string} state - 状态 ('idle' | 'recording' | 'scored')
+   * 更新跟读按钮 UI
    */
-  updateFollowReadUI(sentenceId, state) {
-    const btn = document.querySelector(`[data-sentence-id="${sentenceId}"] .follow-read-btn`);
-    
+  updateFollowReadUI(sentenceIndex, state) {
+    const btn = document.querySelector(`[data-sentence-index="${sentenceIndex}"] .follow-read-btn`);
     if (!btn) return;
-    
+
     switch (state) {
       case 'idle':
         btn.textContent = '🎤 跟读';
         btn.disabled = false;
         btn.classList.remove('recording');
         break;
-        
+      case 'playing':
+        btn.textContent = '🔊 播放原音...';
+        btn.disabled = true;
+        btn.classList.add('recording');
+        break;
       case 'recording':
         btn.textContent = '🔴 录音中...';
         btn.disabled = false;
         btn.classList.add('recording');
         break;
-        
       case 'scored':
         btn.textContent = '🎤 重新跟读';
         btn.disabled = false;
@@ -185,12 +380,12 @@ class NCEApp {
   }
 
   /**
-   * 显示评分结果
-   * @param {string} sentenceId - 句子 ID
-   * @param {Object} result - 评分结果
+   * 显示评分结果弹窗
    */
-  showScoreResult(sentenceId, result) {
-    // 创建评分弹窗
+  showScoreResult(sentenceIndex, result) {
+    // 移除已有弹窗
+    document.querySelectorAll('.score-modal').forEach(m => m.remove());
+
     const modal = document.createElement('div');
     modal.className = 'score-modal';
     modal.innerHTML = `
@@ -201,35 +396,34 @@ class NCEApp {
           <span class="score-label">分</span>
         </div>
         <div class="score-details">
-          <p><strong>识别文本：</strong>${result.recognizedText}</p>
-          <p><strong>文本相似度：</strong>${result.textSimilarity.toFixed(1)}%</p>
-          <p><strong>置信度：</strong>${(result.confidence * 100).toFixed(1)}%</p>
+          <p><strong>识别文本：</strong>${result.recognizedText || '(无)'}</p>
+          <p><strong>文本相似度：</strong>${(result.textSimilarity || 0).toFixed(1)}%</p>
+          <p><strong>置信度：</strong>${((result.confidence || 0) * 100).toFixed(1)}%</p>
         </div>
         <div class="score-feedback">
-          <p>${result.feedback.replace(/\n/g, '<br>')}</p>
+          <p>${(result.feedback || '').replace(/\n/g, '<br>')}</p>
         </div>
         <div class="score-actions">
-          <button onclick="app.playOriginal('${sentenceId}')">🔊 听原音</button>
-          <button onclick="app.playRecording('${sentenceId}')">🎤 听跟读</button>
-          <button onclick="this.closest('.score-modal').remove()">关闭</button>
+          <button onclick="app.playOriginal(${sentenceIndex})">🔊 听原音</button>
+          <button onclick="app.playRecording(${sentenceIndex})">🎤 听跟读</button>
+          <button class="close-score-btn">关闭</button>
         </div>
       </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
-    // 3秒后自动关闭
-    setTimeout(() => {
-      if (modal.parentNode) {
-        modal.remove();
-      }
-    }, 5000);
+
+    // 关闭按钮
+    modal.querySelector('.close-score-btn').addEventListener('click', () => modal.remove());
+
+    // 点击背景关闭
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.remove();
+    });
   }
 
   /**
-   * 获取评分等级
-   * @param {number} score - 分数
-   * @returns {string} 等级类名
+   * 获取评分等级 CSS 类名
    */
   getScoreLevel(score) {
     if (score >= 90) return 'excellent';
@@ -240,82 +434,69 @@ class NCEApp {
   }
 
   /**
-   * 播放原音
-   * @param {string} sentenceId - 句子 ID
-   */
-  playOriginal(sentenceId) {
-    // 实现播放原音逻辑
-    console.log('🔊 播放原音:', sentenceId);
-  }
-
-  /**
-   * 播放跟读录音
-   * @param {string} sentenceId - 句子 ID
-   */
-  playRecording(sentenceId) {
-    const audio = this.recorder.playRecording();
-    if (!audio) {
-      this.showNotification('没有可播放的录音', 'warning');
-    }
-  }
-
-  /**
    * 保存录音
-   * @param {string} sentenceId - 句子 ID
-   * @param {Blob} audioBlob - 音频 Blob
    */
-  saveRecording(sentenceId, audioBlob) {
-    // 保存到 localStorage（实际应用中应该上传到服务器）
+  saveRecording(sentenceIndex, audioBlob) {
     const reader = new FileReader();
     reader.onload = () => {
-      const base64Audio = reader.result;
-      localStorage.setItem(`recording_${sentenceId}`, base64Audio);
-      console.log('✅ 录音已保存:', sentenceId);
+      try {
+        const base64Audio = reader.result;
+        localStorage.setItem(`recording_${sentenceIndex}`, base64Audio);
+        console.log('✅ 录音已保存:', sentenceIndex);
+      } catch (e) {
+        console.warn('⚠ 录音保存失败（可能超出存储空间）:', e.message);
+      }
     };
     reader.readAsDataURL(audioBlob);
   }
 
   /**
    * 保存学习记录
-   * @param {string} sentenceId - 句子 ID
-   * @param {Object} scoreResult - 评分结果
    */
-  saveLearningRecord(sentenceId, scoreResult) {
+  saveLearningRecord(sentenceIndex, scoreResult) {
     const record = {
-      sentenceId,
+      sentenceIndex,
       score: scoreResult ? scoreResult.score : 0,
       timestamp: Date.now(),
       date: new Date().toISOString().split('T')[0]
     };
-    
+
     if (!this.history.records) {
       this.history.records = [];
     }
-    
+
     this.history.records.push(record);
-    
-    // 只保留最近 1000 条记录
+
+    // 只保留最近 1000 条
     if (this.history.records.length > 1000) {
       this.history.records = this.history.records.slice(-1000);
     }
-    
+
     this.saveHistory();
-    console.log('✅ 学习记录已保存');
+
+    // 更新页面上该句子的评分显示
+    const item = document.querySelector(`[data-sentence-index="${sentenceIndex}"]`);
+    if (item) {
+      const scoreEl = item.querySelector('.score-result');
+      if (scoreEl) {
+        scoreEl.style.display = 'block';
+        scoreEl.querySelector('.score-value').textContent = record.score;
+      }
+    }
   }
 
   /**
    * 显示通知
-   * @param {string} message - 消息
-   * @param {string} type - 类型 ('info' | 'success' | 'warning' | 'error')
    */
   showNotification(message, type = 'info') {
+    // 移除已有通知
+    document.querySelectorAll('.notification').forEach(n => n.remove());
+
     const notification = document.createElement('div');
     notification.className = `notification notification-${type}`;
     notification.textContent = message;
-    
     document.body.appendChild(notification);
-    
-    // 3秒后自动消失
+
     setTimeout(() => {
       notification.classList.add('fade-out');
       setTimeout(() => notification.remove(), 300);
@@ -329,6 +510,15 @@ class NCEApp {
     const savedTheme = localStorage.getItem('nce-theme') || 'auto';
     this.theme = savedTheme;
     this.applyTheme();
+  }
+
+  /**
+   * 切换主题
+   */
+  toggleTheme() {
+    this.theme = this.theme === 'dark' ? 'light' : 'dark';
+    this.applyTheme();
+    localStorage.setItem('nce-theme', this.theme);
   }
 
   /**
@@ -347,50 +537,166 @@ class NCEApp {
    * 绑定事件
    */
   bindEvents() {
-    // 主题切换
+    // 使用事件委托
+
+    // 播放句子按钮
     document.addEventListener('click', (e) => {
-      if (e.target.matches('.theme-toggle')) {
-        this.toggleTheme();
-      }
-    });
-    
-    // 跟读按钮
-    document.addEventListener('click', (e) => {
-      if (e.target.matches('.follow-read-btn')) {
-        const sentenceId = e.target.closest('[data-sentence-id]').dataset.sentenceId;
-        const originalText = e.target.closest('[data-sentence-id]').dataset.originalText;
-        
-        if (this.isFollowReading) {
-          this.stopFollowRead(sentenceId);
-        } else {
-          this.startFollowRead(sentenceId, originalText);
+      if (e.target.matches('.play-sentence-btn') || e.target.closest('.play-sentence-btn')) {
+        const btn = e.target.matches('.play-sentence-btn') ? e.target : e.target.closest('.play-sentence-btn');
+        const item = btn.closest('[data-sentence-index]');
+        if (item) {
+          const index = parseInt(item.dataset.sentenceIndex);
+          this.playSentence(index);
         }
       }
     });
+
+    // 跟读按钮
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('.follow-read-btn') || e.target.closest('.follow-read-btn')) {
+        const btn = e.target.matches('.follow-read-btn') ? e.target : e.target.closest('.follow-read-btn');
+        const item = btn.closest('[data-sentence-index]');
+        if (item) {
+          const index = parseInt(item.dataset.sentenceIndex);
+          const text = item.dataset.originalText;
+          this.toggleFollowRead(index, text);
+        }
+      }
+    });
+
+    // 主题切换
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('.theme-toggle') || e.target.closest('.theme-toggle')) {
+        this.toggleTheme();
+      }
+    });
+
+    // 播放控制
+    document.getElementById('playBtn')?.addEventListener('click', () => {
+      this.audioPlayer.playFull();
+    });
+
+    document.getElementById('pauseBtn')?.addEventListener('click', () => {
+      this.audioPlayer.pause();
+    });
+
+    // 倍速控制
+    document.getElementById('speedSelect')?.addEventListener('change', (e) => {
+      const speed = parseFloat(e.target.value);
+      this.speed = speed;
+      this.audioPlayer.setSpeed(speed);
+    });
+
+    // 循环模式
+    document.getElementById('loopBtn')?.addEventListener('click', () => {
+      this.loopMode = !this.loopMode;
+      this.audioPlayer.setLoop(this.loopMode);
+      document.getElementById('loopBtn').textContent =
+        `🔁 循环：${this.loopMode ? '开' : '关'}`;
+    });
+
+    // 跟读模式切换
+    document.getElementById('followReadToggle')?.addEventListener('click', () => {
+      const btn = document.getElementById('followReadToggle');
+      const isOn = btn.textContent.includes('开');
+      btn.textContent = `🎤 跟读模式：${isOn ? '关' : '开'}`;
+    });
+
+    // 视图模式切换
+    document.querySelectorAll('.view-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const mode = btn.dataset.mode;
+        document.querySelectorAll('.text-cn').forEach(el => {
+          el.style.display = (mode === 'en') ? 'none' : 'block';
+        });
+        document.querySelectorAll('.text-en').forEach(el => {
+          el.style.display = (mode === 'cn') ? 'none' : 'block';
+        });
+      });
+    });
+
+    // 收藏按钮
+    document.addEventListener('click', (e) => {
+      if (e.target.matches('.favorite-btn') || e.target.closest('.favorite-btn')) {
+        const btn = e.target.matches('.favorite-btn') ? e.target : e.target.closest('.favorite-btn');
+        btn.textContent = btn.textContent === '☆' ? '★' : '☆';
+      }
+    });
+  }
+
+  /**
+   * 更新播放控制 UI
+   */
+  updatePlayUI() {
+    const playBtn = document.getElementById('playBtn');
+    if (playBtn) {
+      playBtn.textContent = this.isPlaying ? '⏸ 暂停' : '▶ 播放';
+    }
+  }
+
+  /**
+   * 显示无课文状态
+   */
+  showNoLessonState() {
+    document.getElementById('loadingMessage').style.display = 'block';
+    document.getElementById('loadingMessage').innerHTML = `
+      <div style="text-align:center; padding:3rem 1rem;">
+        <p style="font-size:1.2rem; margin-bottom:1rem;">📖 请选择一课开始学习</p>
+        <a href="index.html" style="color:var(--accent);">← 返回首页选择教材</a>
+      </div>
+    `;
+  }
+
+  /**
+   * 显示错误
+   */
+  showError(message) {
+    const el = document.getElementById('errorMessage');
+    if (el) {
+      el.style.display = 'block';
+      document.getElementById('errorText').textContent = message;
+    }
   }
 
   /**
    * 加载学习记录
    */
   loadHistory() {
-    const saved = localStorage.getItem('nce-history');
-    return saved ? JSON.parse(saved) : { records: [] };
+    try {
+      const saved = localStorage.getItem('nce-history');
+      return saved ? JSON.parse(saved) : { records: [] };
+    } catch (e) {
+      return { records: [] };
+    }
   }
 
   /**
    * 保存学习记录
    */
   saveHistory() {
-    localStorage.setItem('nce-history', JSON.stringify(this.history));
+    try {
+      localStorage.setItem('nce-history', JSON.stringify(this.history));
+    } catch (e) {
+      console.warn('⚠ 学习记录保存失败');
+    }
   }
 }
 
 // 初始化应用
 let app;
-document.addEventListener('DOMContentLoaded', () => {
-  app = new NCEApp();
-  app.init();
-});
+(function initApp() {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      app = new NCEApp();
+      app.init();
+    });
+  } else {
+    app = new NCEApp();
+    app.init();
+  }
+})();
 
 // 导出
 window.NCEApp = NCEApp;

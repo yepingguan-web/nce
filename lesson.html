@@ -11,7 +11,7 @@
   <nav class="navbar">
     <div class="nav-left">
       <button class="back-btn" onclick="history.back()">← 返回</button>
-      <h1 class="nav-title">Lesson 1 - A Private Conversation</h1>
+      <h1 class="nav-title" id="navTitle">加载中...</h1>
     </div>
     <div class="nav-actions">
       <button class="theme-toggle" title="切换主题">🌓</button>
@@ -48,86 +48,22 @@
 
   <!-- 句子列表 -->
   <main class="lesson-container">
-    <div class="sentences-list" id="sentencesList">
-      <!-- 示例句子 -->
-      <div class="sentence-item" data-sentence-id="s1" data-original-text="Last week I went to the theatre.">
-        <div class="sentence-header">
-          <span class="sentence-number">1</span>
-          <button class="play-sentence-btn" title="播放此句">▶</button>
-          <button class="follow-read-btn" title="跟读此句">🎤 跟读</button>
-        </div>
-        <div class="sentence-content">
-          <div class="text-en">Last week I went to the theatre.</div>
-          <div class="text-cn" style="display: none;">上周我去看戏。</div>
-        </div>
-        <div class="sentence-actions">
-          <button class="action-btn" title="收藏">☆</button>
-          <button class="action-btn" title="加入清单">📋</button>
-        </div>
-        <!-- 跟读评分结果（默认隐藏） -->
-        <div class="score-result" id="score-s1" style="display: none;">
-          <div class="score-badge">📊 上次评分：<span class="score-value">85</span> 分</div>
-          <button class="view-detail-btn">查看详情</button>
-        </div>
-      </div>
-
-      <div class="sentence-item" data-sentence-id="s2" data-original-text="I had a very good seat.">
-        <div class="sentence-header">
-          <span class="sentence-number">2</span>
-          <button class="play-sentence-btn" title="播放此句">▶</button>
-          <button class="follow-read-btn" title="跟读此句">🎤 跟读</button>
-        </div>
-        <div class="sentence-content">
-          <div class="text-en">I had a very good seat.</div>
-          <div class="text-cn" style="display: none;">我的座位很好。</div>
-        </div>
-        <div class="sentence-actions">
-          <button class="action-btn" title="收藏">☆</button>
-          <button class="action-btn" title="加入清单">📋</button>
-        </div>
-        <div class="score-result" id="score-s2" style="display: none;">
-          <div class="score-badge">📊 上次评分：<span class="score-value">92</span> 分</div>
-          <button class="view-detail-btn">查看详情</button>
-        </div>
-      </div>
-
-      <div class="sentence-item" data-sentence-id="s3" data-original-text="The play was very interesting.">
-        <div class="sentence-header">
-          <span class="sentence-number">3</span>
-          <button class="play-sentence-btn" title="播放此句">▶</button>
-          <button class="follow-read-btn" title="跟读此句">🎤 跟读</button>
-        </div>
-        <div class="sentence-content">
-          <div class="text-en">The play was very interesting.</div>
-          <div class="text-cn" style="display: none;">剧情很有趣。</div>
-        </div>
-        <div class="sentence-actions">
-          <button class="action-btn" title="收藏">☆</button>
-          <button class="action-btn" title="加入清单">📋</button>
-        </div>
-      </div>
-
-      <div class="sentence-item" data-sentence-id="s4" data-original-text="I did not enjoy it.">
-        <div class="sentence-header">
-          <span class="sentence-number">4</span>
-          <button class="play-sentence-btn" title="播放此句">▶</button>
-          <button class="follow-read-btn" title="跟读此句">🎤 跟读</button>
-        </div>
-        <div class="sentence-content">
-          <div class="text-en">I did not enjoy it.</div>
-          <div class="text-cn" style="display: none;">但我并不喜欢它。</div>
-        </div>
-        <div class="sentence-actions">
-          <button class="action-btn" title="收藏">☆</button>
-          <button class="action-btn" title="加入清单">📋</button>
-        </div>
-      </div>
-
-      <!-- 更多句子... -->
+    <!-- 加载中 -->
+    <div id="loadingMessage" style="display:none; text-align:center; padding:2rem;">
+      <p>⏳ 正在加载课文数据...</p>
     </div>
+
+    <!-- 错误信息 -->
+    <div id="errorMessage" style="display:none; text-align:center; padding:2rem; color:var(--error, #e53e3e);">
+      <p id="errorText"></p>
+      <a href="index.html" style="color:var(--accent, #6366f1);">← 返回首页</a>
+    </div>
+
+    <!-- 动态生成的句子列表 -->
+    <div class="sentences-list" id="sentencesList"></div>
   </main>
 
-  <!-- 评分弹窗（动态生成） -->
+  <!-- 评分弹窗容器 -->
   <div id="scoreModalContainer"></div>
 
   <!-- 底部快捷栏 -->
@@ -140,64 +76,12 @@
     </div>
   </div>
 
+  <!-- 脚本加载（按依赖顺序） -->
+  <script src="assets/lrc-parser.js"></script>
+  <script src="assets/lesson-loader.js"></script>
+  <script src="assets/audio-player.js"></script>
   <script src="assets/recorder.js"></script>
   <script src="assets/scorer.js"></script>
   <script src="assets/app.js"></script>
-  <script>
-    // 课文页面特定逻辑
-    document.addEventListener('DOMContentLoaded', () => {
-      // 视图模式切换
-      document.querySelectorAll('.view-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          
-          const mode = btn.dataset.mode;
-          document.querySelectorAll('.text-cn').forEach(el => {
-            el.style.display = (mode === 'en') ? 'none' : 'block';
-          });
-        });
-      });
-
-      // 播放控制
-      document.getElementById('playBtn').addEventListener('click', () => {
-        console.log('▶ 开始播放课文');
-        // 实现播放逻辑
-      });
-
-      document.getElementById('pauseBtn').addEventListener('click', () => {
-        console.log('⏸ 暂停播放');
-        // 实现暂停逻辑
-      });
-
-      // 倍速控制
-      document.getElementById('speedSelect').addEventListener('change', (e) => {
-        const speed = parseFloat(e.target.value);
-        console.log('⚡ 倍速：', speed + 'x');
-        // 实现倍速逻辑
-      });
-
-      // 跟读模式切换
-      let followReadMode = false;
-      document.getElementById('followReadToggle').addEventListener('click', () => {
-        followReadMode = !followReadMode;
-        document.getElementById('followReadToggle').textContent = 
-          `🎤 跟读模式：${followReadMode ? '开' : '关'}`;
-        console.log('🎤 跟读模式：', followReadMode);
-      });
-
-      // 句子播放按钮
-      document.querySelectorAll('.play-sentence-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const sentenceItem = btn.closest('.sentence-item');
-          const sentenceId = sentenceItem.dataset.sentenceId;
-          console.log('▶ 播放句子：', sentenceId);
-          // 实现句子播放逻辑
-        });
-      });
-
-      // 跟读按钮（已在 app.js 中绑定）
-    });
-  </script>
 </body>
 </html>

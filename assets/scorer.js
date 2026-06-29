@@ -118,6 +118,9 @@ class PronunciationScorer {
       confidenceScore * 0.3     // 置信度权重 30%
     );
 
+    // 存储 textSimilarity 供 getScore() 使用
+    this._lastTextSimilarity = textSimilarity;
+
     // 4. 生成反馈
     this.feedback = this.generateFeedback(this.score, textSimilarity, confidenceScore);
 
@@ -236,7 +239,8 @@ class PronunciationScorer {
       score: this.score,
       feedback: this.feedback,
       recognizedText: this.recognizedText,
-      confidence: this.confidence
+      confidence: this.confidence,
+      textSimilarity: this._lastTextSimilarity || 0
     };
   }
 
