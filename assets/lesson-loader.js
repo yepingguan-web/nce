@@ -3,6 +3,16 @@
  * 从 URL hash 解析课文信息，加载 LRC 文件并解析句子数据
  */
 
+/**
+ * 安全编码文件路径中的每个段（正确处理 & 等特殊字符）
+ * encodeURI 不会编码 &，但 & 在 URL 路径中会被误解析为查询分隔符
+ * @param {string} path - 如 "NCE1/001&002－Excuse Me.mp3"
+ * @returns {string} 编码后的路径
+ */
+function encodeURIPath(path) {
+  return path.split('/').map(encodeURIComponent).join('/');
+}
+
 class LessonLoader {
   /**
    * 从 URL hash 加载课文数据
@@ -36,7 +46,7 @@ class LessonLoader {
     // 加载 LRC 文件（编码特殊字符）
     let lrcText;
     try {
-      const response = await fetch(encodeURI(lrcPath));
+      const response = await fetch(encodeURIPath(lrcPath));
       if (!response.ok) {
         throw new Error(`LRC 文件不存在 (${response.status})`);
       }
