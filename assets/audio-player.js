@@ -26,7 +26,6 @@ class AudioPlayer {
     this.pause();
     this.sentences = sentences || [];
     this.currentIndex = -1;
-    // 逐段 URL 编码（encodeURIComponent 会编码 & 等特殊字符）
     this.audio.src = encodeURIPath(mp3Path);
     this.audio.load();
   }
